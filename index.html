@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>냉파의 민족</title>
+  <!-- Pretendard 폰트 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+  
+  <!-- Presentation 폰트 -->
+  <style>
+    @font-face {
+        font-family: 'Presentation';
+        src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-7Bold.woff2') format('woff2');
+        font-weight: 700;
+        font-display: swap;
+    }
+
+    body {
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      color: #1d1d1f;
+      font-size: 13px;
+    }
+
+    header {
+      position: sticky; top: 0;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid rgba(0,0,0,0.05);
+      padding: 14px; text-align: center; z-index: 100;
+      cursor: pointer;
+    }
+
+    header h1 {
+      font-family: "Presentation", sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      color: #111;
+      margin: 0;
+      letter-spacing: -0.3px;
+    }
+
+    .search-box {
+      display: flex; justify-content: center;
+      margin: 16px auto; flex-wrap: wrap;
+      gap: 8px; max-width: 480px; padding: 0 16px;
+    }
+    .search-box input, .search-box select {
+      flex: 1; padding: 6px 8px; font-size: 11px;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      outline: none;
+      background: #fff;
+    }
+    .search-box button {
+      background: #007aff; border: none; color: white;
+      padding: 0 10px; border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer; font-weight: 500;
+      transition: background 0.2s;
+    }
+    .search-box button:hover { background: #0062d6; }
+
+    #results {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 300px;
+      padding: 20px;
+      text-align: center;
+      background: #f5f5f5;
+    }
+    .grid {
+      display: grid !important;
+      justify-content: initial;
+      align-items: initial;
+      text-align: left;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+    }
+
+    .card {
+      background: #fff; border-radius: 10px; overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    .card img { width: 100%; height: 140px; object-fit: cover; }
+    .card h3 { margin: 8px; font-size: 12px; font-weight: 500; color: #111; }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #007aff;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      align-items: center; justify-content: center;
+      z-index: 2000;
+    }
+    .overlay.show { display: flex; }
+
+    .modal {
+      background: #fff; border-radius: 12px;
+      max-width: 500px; width: 88%;
+      max-height: 75vh; overflow-y: auto; padding: 16px; position: relative;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      animation: pop 0.25s ease;
+    }
+    .modal img {
+      width: 100%;
+      max-height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+
+    .random-result {
+      max-width: 220px;
+      width: 100%;
+      background: #fff;
+      border-radius: 12px;
+      padding: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .random-result h2 {
+      font-size: 14px;
+      margin: 3px 0;
+    }
+    .random-result .area {
+      font-size: 11px;
+      margin-bottom: 4px;
+      color: #444;
+    }
+    .random-result img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 8px;
+      margin: 4px 0;
+    }
+    .youtube {
+      display: inline-block; background: #ff3b30; color: white;
+      padding: 3px 6px; border-radius: 6px;
+      text-decoration: none;
+      margin-top: 6px;
+      font-size: 11px; font-weight: 500;
+    }
+
+    .placeholder-img {
+      max-width: 220px;
+      width: 100%;
+      border-radius: 0;
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 onclick="resetView()">🍴 냉파의 민족</h1>
+  </header>
+
+  <div class="search-box">
+    <input id="searchInput" type="text" placeholder="재료를 입력하세요 (예: chicken)">
+    <select id="categorySelect"><option value="">-- 카테고리 선택 --</option></select>
+    <button onclick="searchMeals()">검색</button>
+    <button onclick="randomMeal()">랜덤 추천 🎲</button>
+  </div>
+
+  <div id="results">
+    <img class="placeholder-img" src="https://letter.wepick.kr/wp-content/uploads/2023/12/Njp2gc59nz_IqYLyJi5geXwgNB0.jpg.webp" alt="placeholder">
+  </div>
+
+  <div id="overlay" class="overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="close-btn" onclick="closeModal()">×</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    function getFlagEmoji(country) {
+      const flags = {
+        "American": "🇺🇸","British": "🇬🇧","Canadian": "🇨🇦","Chinese": "🇨🇳","Croatian": "🇭🇷",
+        "Dutch": "🇳🇱","Egyptian": "🇪🇬","French": "🇫🇷","Greek": "🇬🇷","Indian": "🇮🇳",
+        "Irish": "🇮🇪","Italian": "🇮🇹","Jamaican": "🇯🇲","Japanese": "🇯🇵","Kenyan": "🇰🇪",
+        "Malaysian": "🇲🇾","Mexican": "🇲🇽","Moroccan": "🇲🇦","Polish": "🇵🇱","Portuguese": "🇵🇹",
+        "Russian": "🇷🇺","Spanish": "🇪🇸","Thai": "🇹🇭","Tunisian": "🇹🇳","Turkish": "🇹🇷","Vietnamese": "🇻🇳"
+      };
+      return flags[country] || "🌍";
+    }
+
+    window.onload = async () => {
+      const res = await fetch("https://www.themealdb.com/api/json/v1/1/list.php?c=list");
+      const data = await res.json();
+      const select = document.getElementById("categorySelect");
+      data.meals.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.strCategory;
+        opt.textContent = c.strCategory;
+        select.appendChild(opt);
+      });
+    };
+
+    function showLoading(target, text="") {
+      target.className = "";
+      target.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+          <div class="spinner"></div>
+          ${text ? `<p>${text}</p>` : ""}
+        </div>
+      `;
+    }
+
+    async function searchMeals() {
+      const ingredient = document.getElementById('searchInput').value.trim();
+      const category = document.getElementById('categorySelect').value;
+      const results = document.getElementById('results');
+      showLoading(results, "불러오는 중...");
+
+      let url = "";
+      if (ingredient) {
+        url = `https://www.themealdb.com/api/json/v1/1/filter.php?i=${encodeURIComponent(ingredient)}`;
+      } else if (category) {
+        url = `https://www.themealdb.com/api/json/v1/1/filter.php?c=${encodeURIComponent(category)}`;
+      } else {
+        resetView();
+        return;
+      }
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!data.meals) {
+          results.className = "";
+          results.innerHTML = "검색 결과가 없습니다."; return;
+        }
+        results.className = "grid";
+        results.innerHTML = data.meals.slice(0, 12).map(m=>`
+          <div class="card" onclick="showDetail('${m.idMeal}')">
+            <img src="${m.strMealThumb}" alt="${m.strMeal}">
+            <h3>${m.strMeal}</h3>
+          </div>`).join("");
+      } catch(e) {
+        results.className = "";
+        results.innerHTML = "<span style='color:red;'>레시피 불러오기 오류</span>";
+      }
+    }
+
+    async function showDetail(id) {
+      const overlay = document.getElementById('overlay');
+      const modalBody = document.getElementById('modalBody');
+      overlay.classList.add('show');
+      showLoading(modalBody, "불러오는 중...");
+      try {
+        const res = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`);
+        const meal = (await res.json()).meals[0];
+        renderDetail(meal, modalBody, false);
+      } catch(e) {
+        modalBody.innerHTML = "<p style='color:red;'>상세 불러오기 오류</p>";
+      }
+    }
+
+    async function randomMeal() {
+      const results = document.getElementById('results');
+      showLoading(results, "랜덤 요리 불러오는 중...");
+      try {
+        const res = await fetch("https://www.themealdb.com/api/json/v1/1/random.php");
+        const meal = (await res.json()).meals[0];
+        results.className = "";
+        results.innerHTML = `
+          <div class="random-result">
+            <h2>${meal.strMeal}</h2>
+            <div class="area">${getFlagEmoji(meal.strArea)} ${meal.strArea}</div>
+            <img src="${meal.strMealThumb}">
+            ${meal.strYoutube ? `<a class="youtube" target="_blank" href="${meal.strYoutube}">▶ 유튜브에서 보기</a>`:""}
+          </div>
+        `;
+      } catch(e) {
+        results.className = "";
+        results.innerHTML = "<span style='color:red;'>랜덤 불러오기 오류</span>";
+      }
+    }
+
+    function renderDetail(meal, target, isKorean) {
+      const ingredients = [];
+      for (let i=1;i<=20;i++) {
+        const ing = meal[`strIngredient${i}`], m = meal[`strMeasure${i}`];
+        if (ing && ing.trim()) ingredients.push(`<li>${ing} - ${m}</li>`);
+      }
+      const steps = meal.strInstructions
+        .split(/\r?\n/)
+        .filter(line => line.trim())
+        .map(line => `<li>${line}</li>`)
+        .join("");
+
+      const html = `
+        <h2>${meal.strMeal}</h2>
+        <div class="area">${getFlagEmoji(meal.strArea)} ${meal.strArea}</div>
+        <img src="${meal.strMealThumb}">
+        <h3>${isKorean ? "재료" : "Ingredients"}</h3>
+        <ul>${ingredients.join("")}</ul>
+        <h3>${isKorean ? "조리 방법" : "Instructions"}</h3>
+        <ol>${steps}</ol>
+        ${meal.strYoutube ? `<a class="youtube" target="_blank" href="${meal.strYoutube}">▶ ${isKorean ? "유튜브에서 보기" : "Watch on YouTube"}</a>`:""}
+      `;
+      if (target) target.innerHTML = html;
+      return html;
+    }
+
+    function closeModal() {
+      document.getElementById('overlay').classList.remove('show');
+    }
+
+    function resetView() {
+      const results = document.getElementById('results');
+      results.className = "";
+      results.innerHTML = `<img class="placeholder-img" src="https://letter.wepick.kr/wp-content/uploads/2023/12/Njp2gc59nz_IqYLyJi5geXwgNB0.jpg.webp" alt="placeholder">`;
+    }
+
+    document.getElementById('searchInput').addEventListener('keypress', e => {
+      if(e.key==='Enter') searchMeals();
+    });
+  </script>
+</body>
+</html>
