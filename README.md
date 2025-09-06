@@ -2,6 +2,7 @@
 
 냉장고 속 재료로 만들 수 있는 요리를 검색하거나 랜덤으로 추천받을 수 있는 웹앱입니다.  
 [TheMealDB API](https://www.themealdb.com/api.php)를 활용하여 레시피 정보를 불러옵니다.
+간단하게 웹사이트의 구조(HTML, CSS, JS)와 API 사용을 경험해볼 수 있는 실습입니다.
 
 <br/>
 
